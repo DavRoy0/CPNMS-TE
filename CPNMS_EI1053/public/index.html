@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+    <title>CPMNS</title>
+
+    <!-- Required Stylesheets -->
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css"
+    />
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.css"
+    />
+
+    <!-- Required scripts -->
+    <script src="//cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.min.js"></script>
+    <script src="//unpkg.com/babel-polyfill@latest/dist/polyfill.min.js"></script>
+    <script src="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
+  </head>
+  <body style="background: radial-gradient(circle, #FFA500, #8B0000);">
+    <!-- Our application root element -->
+    <div id="app">
+      <b-container>
+        <b-jumbtron header="CATASTROFES" lead="Demo de catástrofes">
+          <h1 style="color: white; font-size:50px;">CPMNS-Management</h1>
+        </b-jumbtron>
+        <b-form-group horizontal :label-cols="4" label="Obtener informacion de una catastrofe" style="color: white; font-size: 24px;">
+          <b-form-input v-model.trim="idCatastrophe" placeholder="Introduce el id de una catastrofe(Por ejemplo: 101)" 
+                        @keyup.enter="getInfoCatastropheById(idCatastrophe)" >
+          </b-form-input>
+        </b-form-group>
+        <div v-if="catastrophe" style="color: white"><br>
+          <h5>Información de la catástrofe:</h5>
+          <p>País: {{ catastrophe.country }}</p>
+          <p>Ciudades: {{ catastrophe.cities }}</p>
+          <p>Provincia: {{ catastrophe.province }}</p>
+          <p>Área: {{ catastrophe.area }}</p>
+          <p>Fecha: {{ catastrophe.date }}</p>
+          <p>Tipo: {{ catastrophe.type.name }}</p>
+        </div>
+
+        <b-form-group horizontal :label-cols="4" label="Obtener informacion de un protocolo" style="color: white; font-size: 24px;">
+          <b-form-input v-model.trim="typeId" placeholder="Introduce el id de una tipo de protocolo(Por ejemplo: 1 o 2)" 
+                        @keyup.enter="getActionProtocolsByType(typeId)" >
+          </b-form-input>
+        </b-form-group>
+        <div v-if="actionprotocol" style="color: white"><br>
+          <h5>Información del protocolo:</h5>
+          <p>Nombre: {{ actionprotocol.name }}</p>
+          <p>Descripción: {{ actionprotocol.description }}</p>
+          <p>Nombre_Tipo: {{ actionprotocol.type.name }}</p>
+          <p>Descripción Tipo: {{ actionprotocol.type.description }}</p>
+        </div>
+
+        <div>
+          <b-form-group horizontal :label-cols="4" label="Añadir una catástrofe" style="color: white; font-size: 24px;">
+            <!--<b-form-input v-model.trim="idCatastrophePost" placeholder="Nombre" @keyup.enter="newCatastropheAlert"></b-form-input>-->
+            <b-form-input v-model.trim="country" placeholder="Country" @keyup.enter="newCatastropheAlert"></b-form-input>
+            <b-form-input v-model.trim="city" placeholder="City" @keyup.enter="newCatastropheAlert"></b-form-input>
+            <b-form-input v-model.trim="province" placeholder="Province" @keyup.enter="newCatastropheAlert"></b-form-input>
+            <b-form-input v-model.trim="cities" placeholder="Cities" @keyup.enter="newCatastropheAlert"></b-form-input>
+            <b-form-input v-model.trim="idtype" placeholder="Type" @keyup.enter="newCatastropheAlert"></b-form-input>
+            <b-form-input v-model.trim="area" placeholder="Area" @keyup.enter="newCatastropheAlert"></b-form-input>
+            <b-form-input v-model.trim="date" placeholder="Date" @keyup.enter="newCatastropheAlert"></b-form-input>
+          
+          </b-form-group><br>
+          <button @click="newCatastropheAlert">Crear Catástrofe</button>
+          </div>
+
+          <div>
+          <b-form-group horizontal :label-cols="4" label="Añadir preferencia de alerta" style="color: white; font-size: 24px;">
+            <b-form-input v-model.trim="userId" placeholder="IDUsuario" @keyup.enter="createOrReplacePreferencesOfAlert"></b-form-input>
+            <!--<b-form-input v-model.trim="preferenceId" placeholder="IDPreferencia" @keyup.enter="createOrReplacePreferencesOfAlert"></b-form-input>-->
+            <b-form-input v-model.trim="newProvince" placeholder="Province" @keyup.enter="createOrReplacePreferencesOfAlert"></b-form-input>
+            <b-form-input v-model.trim="idtypeCatastrophe" placeholder="idtypeCatastrophe" @keyup.enter="createOrReplacePreferencesOfAlert"></b-form-input>
+          </b-form-group><br>
+          <button @click="createOrReplacePreferencesOfAlert">Crear nueva preferencia</button>
+          </div>
+      </b-container>
+    </div>
+
+    <!-- Start running your app -->
+
+    <script>
+      window.app  = new Vue({
+        el: '#app',
+        data: {
+          //Datos para getcatastrofe
+          idCatastrophe: '',
+          catastrophe: null,
+          //Datos para getActionProtocol
+          typeId: '',
+          actionprotocol:null ,
+          //Datos para añadir nueva Catastrofe
+          //idCatastrophePost: null,
+          country: '',
+          city: '',
+          province: '',
+          cities: null,
+          idtype: null, //Id del tipo de catastrofe
+          area: null,
+          date: '',
+          //Datos para añadir una nueva preferencia
+          userId: null,
+          //preferenceId: null,
+          newProvince: '',
+          idtypeCatastrophe: null
+        },
+        computed: {
+          showAlert() {
+            return this.name.length > 2 ? true : false
+          }
+        },
+        methods:{
+          getInfoCatastropheById(idCatastrophe){
+            let self = this
+            
+            this.idCatastrophe = idCatastrophe.trim()
+
+            let gQL = `query{getInfoCatastropheById(idCatastrophe:"${this.idCatastrophe}"){country cities province area date type{name}}}`
+            //console.log(gQL)
+            fetch('/graphql?query=' + encodeURIComponent(gQL))
+            .then(function(r){return r.json()})
+            .then(function(json){
+              //console.log(json.data.getInfoCatastropheById)
+              self.catastrophe = json.data.getInfoCatastropheById 
+            })
+            .catch(function(error){console.log(error)})
+          },
+          getActionProtocolsByType(typeId){
+            let self = this
+            
+            this.typeId = typeId
+
+            let gQL = `query{getActionProtocolsByType(typeId:"${this.typeId}"){name description  type{name description}}}`
+            console.log(gQL)
+            fetch('/graphql?query=' + encodeURIComponent(gQL))
+            .then(function(r){return r.json()})
+            .then(function(json){
+              //console.log(json.data.getActionProtocolsByType[0])
+              self.actionprotocol = json.data.getActionProtocolsByType[0] 
+            })
+            .catch(function(error){console.log(error)})
+          },
+
+          newCatastropheAlert() {
+            let self = this; // Guardar una referencia al contexto actual de Vue.js
+
+            const query = {
+              query: `mutation {
+          newCatastropheAlert(
+          country: "${this.country}",
+          city: "${this.city}",
+          province: "${this.province}",
+          cities: "${this.cities.split(",")}",
+          idtype: "${this.idtype}",
+          area: ${parseFloat(this.area)},
+          date: "${this.date}",
+        ) {
+          _id
+          country
+          city
+          province
+          cities
+          type {
+            name
+            description
+          }
+          area
+          date
+        }
+      }`,
+            };
+            // Realizar una solicitud POST a la ruta '/graphql' con la consulta GraphQL y las variables en el cuerpo
+            fetch('/graphql', {
+                headers: { 'content-type': 'application/json' },
+                method: 'POST',
+                body: JSON.stringify(query),
+            })
+            .then(function(r) {
+                return r.json();
+            })
+            .then(function(json) {
+                // Manejar la respuesta JSON de la solicitud
+                if (json.errors) {
+                    // Si hay errores, mostrar una alerta y registrar los errores en la consola
+                    alert("Error! (mira la consola)");
+                    console.log(json.errors);
+                } else {
+                    // Si no hay errores, mostrar una alerta indicando que la alerta de catástrofe ha sido creada
+                    alert('Alerta de catástrofe creada');
+                }
+            })
+            .catch(function(error) {
+                // Capturar y registrar cualquier error que ocurra durante la solicitud
+                console.log(error);
+            });
+          },
+
+           createOrReplacePreferencesOfAlert() {
+            let self = this; // Guardar una referencia al contexto actual de Vue.js
+
+            const query = {
+              query: `mutation {
+          createOrReplacePreferencesOfAlert(
+            userId: "${this.userId}",
+            idtypeCatastrophe: "${this.idtypeCatastrophe}",
+            newProvince: "${this.newProvince}"
+          ) {
+              _id
+              province
+              typeCatastrophe {
+                name
+                description
+              }
+            }
+          }`,
+            };
+            // Realizar una solicitud POST a la ruta '/graphql' con la consulta GraphQL y las variables en el cuerpo
+            fetch('/graphql', {
+                headers: { 'content-type': 'application/json' },
+                method: 'POST',
+                body: JSON.stringify(query),
+            })
+            .then(function(r) {
+                return r.json();
+            })
+            .then(function(json) {
+                // Manejar la respuesta JSON de la solicitud
+                if (json.errors) {
+                    // Si hay errores, mostrar una alerta y registrar los errores en la consola
+                    alert("Error! (mira la consola)");
+                    console.log(json.errors);
+                } else {
+                    // Si no hay errores, mostrar una alerta indicando que la alerta de catástrofe ha sido creada
+                    alert('Alerta de catástrofe creada');
+                }
+            })
+            .catch(function(error) {
+                // Capturar y registrar cualquier error que ocurra durante la solicitud
+                console.log(error);
+            });
+          }
+          
+        }
+      })
+    </script>
+  </body>
+
+</html>
+
