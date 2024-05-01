@@ -7,6 +7,7 @@ const Realm = require('realm')
 //import model from 'model'
 const model = require('./model') //Database
 
+const graph = require('./datosproyecto.json')
 let DB
 
 model.getDB().then(db => {DB = db})
@@ -23,7 +24,7 @@ const schema = buildSchema(`
     actionProtocols: [ActionProtocol]
     typecatastrophe: [TypeCatastrophe]
     users: [User]
-    
+    jsonLD: String
     getInfoCatastropheById(idCatastrophe: ID!): Catastrophe
     
     getActionProtocolsByType(typeId: ID!): [ActionProtocol]
@@ -172,6 +173,9 @@ const rootValue = {
       }
       return newPreference;
       
+    }, 
+    jsonLD:()=>{
+      return JSON.stringify(graph)
     }
 }
 
