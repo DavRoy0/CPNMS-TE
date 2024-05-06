@@ -1,7 +1,7 @@
 {
-  "name": "blogs",
+  "name": "cpmns",
   "version": "1.0.0",
-  "description": "Ejemplo de Servicio de BLOGS",
+  "description": "Catastrophe Prevention Management and Notification System",
   "main": "server.js",
   "scripts": {
     "prestart": "npm install",
